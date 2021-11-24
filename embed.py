@@ -18,17 +18,10 @@ class Embed(nn.Module):
         print("vocab_size", vocab_size)
         self.lstm_layers = lstm_layers
         self.ru_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)
-        #self.rv_embeddings = self.ru_embeddings
         self.rv_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)
         self.au_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)
-        self.av_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)#self.au_embeddings
-        
-#         self.reu_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)
-#         self.rev_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)#self.ru_embeddings
-#         #self.rv_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)
-#         self.aeu_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)
-#         self.aev_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)#self.aeu_embeddings
-#         #self.av_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)
+        self.av_embeddings = nn.Embedding(vocab_size, embedding_dim, sparse=False)
+
 
         self.init_emb()
         self.zero_out()
@@ -44,18 +37,11 @@ class Embed(nn.Module):
         """Initialize R and A embeddings"""
         initrange = 0.5 / self.emb_dim
         self.ru_embeddings.weight.data.uniform_(-initrange, initrange)
-        # self.ru_embeddings.weight.data[0].zero_()
         self.rv_embeddings.weight.data.uniform_(-0, 0)
         self.au_embeddings.weight.data.uniform_(-initrange, initrange)
-        # self.au_embeddings.weight.data[0].zero_()
         self.av_embeddings.weight.data.uniform_(-0, 0)
         
-#         self.reu_embeddings.weight.data.uniform_(-initrange, initrange)
-#         #self.ru_embeddings.weight.data[0].zero_()
-#         self.rev_embeddings.weight.data.uniform_(-0, 0)
-#         self.aeu_embeddings.weight.data.uniform_(-initrange, initrange)
-#         #self.au_embeddings.weight.data[0].zero_()
-#         self.aev_embeddings.weight.data.uniform_(-0, 0)
+
 
     def init_hc(self, batch_size):
         h = Variable(
@@ -71,7 +57,4 @@ class Embed(nn.Module):
         self.au_embeddings.weight.data[0].zero_()
         self.rv_embeddings.weight.data[0].zero_()
         self.av_embeddings.weight.data[0].zero_()
-#         self.reu_embeddings.weight.data[0].zero_()
-#         self.aeu_embeddings.weight.data[0].zero_()
-#         self.rev_embeddings.weight.data[0].zero_()
-#         self.aev_embeddings.weight.data[0].zero_()
+

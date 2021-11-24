@@ -42,13 +42,13 @@ class Utils:
                 ss=1
                 if ind == 0:
                     return 1/(ind+1), (ind < k_s[0]), 1
-                    #return 1/(ind+1), np.array([int(ind < k) for k in k_s]), 1
+
                 else:
                     return 1/(ind+1), (ind < k_s[0]), 0
-                    #return 1/(ind+1), np.array([int(ind < k) for k in k_s]), 0
+
         if ss==0:
             return 0,0,0
-            #return 0,np.array([int(100 < k) for k in k_s]),0
+
                 
 
     def save_model(self, model_name, model, optimizer, epoch):

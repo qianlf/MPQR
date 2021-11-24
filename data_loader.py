@@ -122,19 +122,19 @@ class DataLoader():
             u2index=dict()
             for num,i in enumerate(lines):
                 u,v= i.split(' ')
-                if u[0]=="R" and u[0] not in q_raiser:
-                    q_raiser.append(u)
-                if u[0]=='A' and u[0] not in answerer:
-                    answerer.append(u)
-                if v[0]=="R" and v[0] not in q_raiser:
-                    q_raiser.append(v)
-                if v[0]=='A' and v[0] not in answerer:
-                    answerer.append(v)
-                if u not in u2index:
-                    u2index[u]=list()
-                    u2index[u].append(num)
+                if u[0]=="R" and u.replace('\n','') not in q_raiser:
+                    q_raiser.append(u.replace('\n',''))
+                if u[0]=='A' and u.replace('\n','') not in answerer:
+                    answerer.append(u.replace('\n',''))
+                if v[0]=="R" and v.replace('\n','') not in q_raiser:
+                    q_raiser.append(v.replace('\n',''))
+                if v[0]=='A' and v.replace('\n','') not in answerer:
+                    answerer.append(v.replace('\n',''))
+                if u.replace('\n','') not in u2index:
+                    u2index[u.replace('\n','')]=list()
+                    u2index[u.replace('\n','')].append(num)
                 else:
-                    u2index[u].append(num)
+                    u2index[u.replace('\n','')].append(num)
             #data = [line.strip().split(" ") for line in lines]
             print('Raiser num',len(q_raiser))
             print('Answerer num',len(answerer))
@@ -171,14 +171,7 @@ class DataLoader():
             for line in lines:
                 line = line.strip().split(" ")
                 counter.update(line)
-            # line = fin.readline()
-            # path = line.strip().split(" ")
-            # for entity in path:
-                # count_dict[entity] = count_dict.get(entity, 0) + 1
 
-        # keys: entity id, values: count
-        #count = list(zip(count_dict.keys(), count_dict.values()))
-        #count.sort(key=lambda x: x[1], reverse=True)
         return counter.most_common()
 
     def __init_sample_table(self):
@@ -320,27 +313,8 @@ class DataLoader():
     
     
     def get_traintest_batch(self, test_prop):
-        """
-        Build a batch for test
 
 
-
-
-
-        Args:
-            test_prop      -  the ratio of data fed to test,
-                               if None, use all batch
-            test_neg_ratio  -  the ratio of negative test instances,
-                               expected to be an integer
-
-        Returns:
-            A list of test data, formatted as follows:
-                trank_a - a list of answers (vector)
-                rid - the raiser ID (scalar)
-                qid - the question ID (scalar)
-                accaid - the accepted answer owner ID (scaler)
-        """
-        # total = self.testset.shape[0]
         total = len(self.traintestset)
         if test_prop:
             batch_size = int(total * test_prop)
@@ -351,29 +325,7 @@ class DataLoader():
     
     
     def get_answer_sample(self, upos, sample_size):
-        """
-        This method is for Ranking CNN
 
-        Args:
-            upos  -  Label entity column
-            vpos  -  Context entity column
-        Return:
-            aqr   -  three cols list:
-                     A of upos, Q of vpos, R of this Q
-            acc   -  one col list:
-                     the Accepted answer in the corresponding pos
-
-        TODO:
-            For now, we only look at AQ pair. We can also implement
-            AR pair to list of Q's and sample some Q to construct tuples.
-            But those are left for future implementation.
-        WHY:
-        In upos and vpos, find all following pairs:
-            1 - "A-Q"
-            2 - "A-R" (Not implemented)
-        construct:
-            "A-R-Q", "A*-R-Q"
-        """
         length = upos.shape[1]
 
         # R: 0, A: 1, Q: 2
@@ -386,8 +338,7 @@ class DataLoader():
         for i in range(length):
             if upos[2][i]:
                 qid = upos[2][i]
-                # aid_samples = self.q2a[qid]
-                # aid_samples = copy.deepcopy(self.q2a[qid])
+
                 aids = []
                 aids += self.q2a[qid]
                 accaid = self.q2acc[qid]
@@ -399,7 +350,6 @@ class DataLoader():
                 
                 for i in aids:
                     q_a=str(qid)+"_"+str(i)
-                    #point_wise.append([rid,i,qid])
                     score_list.append(int(self.a2score[q_a]))
                 score=max(abs(np.array(score_list)))+1
                 score_min=min(np.array(score_list))    
@@ -412,8 +362,7 @@ class DataLoader():
                     q_a=str(qid)+"_"+str(i)
                     point_wise.append([rid,i,qid])
                     score_i= (int(self.a2score[q_a]))#/(2*score)+0.5
-                    #if int(self.a2score[q_a])<0:
-                     #   print("-----",score_i)
+
                     
                     points.append((score_i/score)*10)
 
@@ -442,13 +391,6 @@ class DataLoader():
                             size=sample_size - len(aid_samples))
                     aid_samples += list(more_ans) 
 
-                    
-                #aid_samples = np.random.choice(
-                #     aidlist, replace=True,
-                #    size=int(len(aidlist) * sample_rate))
-                #aid_samples = self.q2a[qid]
-                #aid_samples.pop(accaid)
-                #print(aid_samples)
 
                 for x in aid_samples:
                     datalist.append([rid, x, qid])
@@ -492,10 +434,12 @@ class DataLoader():
         if qid:
             question = self.question_text[qid]
             question = [x for x in question.strip().split(" ")
-                          if x in self.w2vmodel.vocab]
+                          if x in self.w2vmodel]
+           # print(question)
             if question:
                 qvecs = self.w2vmodel[question].tolist()
                 q_len = len(question)
+                
                 if q_len > self.PAD_LEN:
                     qvecs = qvecs[:self.PAD_LEN]
                 else:
@@ -682,20 +626,11 @@ class DataLoader():
         return qvecs
                                        
                                        
-    def qid2vec_t(self, qid_list):
-        
-        qvecs = [self.qid2time[qid] for qid in qid_list]
-        return qvecs
-    
+
     def q2len(self, qid):
         return self.qid2len[qid]
                                        
                                        
-    def q2time(self, qid):
-        if qid not in self.qid2time:
-            return self.qid2time[random.choice(list(self.qid2time))]
-        else:
-            return self.qid2time[qid]
 
 
     def qid2vec_length(self, qid_list):
@@ -741,7 +676,5 @@ class DataLoader():
         vfunc = np.vectorize(lambda x: self.ind2uid[x])
         return vfunc(vec)
 
-# if __name__ == "__main__":
-#     test = DataLoader(dataset="3dprinting")
-#     test.__load_word2vec()
+
 
